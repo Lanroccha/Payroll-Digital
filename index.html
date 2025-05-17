@@ -1,998 +1,1091 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayRoll - Suas folhas de pagamento todo mês</title>
+    <title>PayRoll Digital - Sistema de Contracheques</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
         }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .transition-all {
+        .sidebar {
             transition: all 0.3s ease;
         }
-        .paycheck-entry:nth-child(even) {
-            background-color: #f3f4f6;
+        .sidebar-collapsed {
+            width: 70px;
         }
-        .paycheck-entry:hover {
-            background-color: #e5e7eb;
-        }
-        .form-shadow {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .input-focus:focus {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-        }
-        .checkbox:checked {
-            background-color: #8b5cf6;
-            border-color: #8b5cf6;
-        }
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-        .section-highlight {
-            background: linear-gradient(90deg, rgba(243, 244, 246, 0.8) 0%, rgba(249, 250, 251, 0.9) 100%);
-        }
-        .scroll-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+        .sidebar-collapsed .sidebar-text {
             display: none;
-            z-index: 99;
         }
-        .highlight-box {
-            border-left: 4px solid #3b82f6;
+        .sidebar-collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: all 0.3s ease;
+        }
+        .content-expanded {
+            margin-left: 70px;
+        }
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .file-upload {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover {
+            border-color: #3b82f6;
+        }
+        .holerite-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header>
-        <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fas fa-money-bill-wave text-2xl"></i>
-                <h1 class="text-2xl font-bold">PayRoll Digital</h1>
-            </div>
-            <nav>
-                <ul class="flex space-x-6">
-                    <li><a href="#" id="homeLink" class="hover:underline font-medium">Início</a></li>
-                    <li><a href="#" id="loginLink" class="hover:underline font-medium">Login</a></li>
-                    <li><a href="#" id="registerLink" class="hover:underline font-medium">Registre-se</a></li>
-                     <li><a href="#" id="registerLink" class="hover:underline font-medium">Administrador</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Hero Section -->
-        <section id="hero" class="text-center py-12">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Acompanhe seu Payroll com facilidade</h2>
-                <p class="text-xl text-gray-600 mb-8">Gerencie aqui os seus valores recebidos.</p>
-                <div class="flex justify-center space-x-4">
-                    <button id="getStartedBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all">
-                        Começar
-                    </button>
-                    <button class="border border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-6 rounded-lg transition-all">
-                        Saiba mais
+<body class="bg-gray-100 font-sans">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">Acessar PayRoll Digital</h3>
+                    <button onclick="closeModal('loginModal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-            </div>
-        </section>
-
-        <!-- Login Form -->
-        <section id="loginSection" class="hidden max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-800">Bem-vindo de volta</h2>
-                <p class="text-gray-600">Faça login para acessar seu histórico de Payroll</p>
-            </div>
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="loginEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="rememberMe" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                        <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Lembrar-me</label>
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700">E-mail</label>
+                        <input type="email" id="loginEmail" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <a href="#" class="text-sm text-indigo-600 hover:underline">Esqueceu sua senha?</a>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all">
-                    Entrar
-                </button>
-            </form>
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">Não tem uma conta? <a href="#" id="switchToRegister" class="text-indigo-600 hover:underline">Registre-se</a></p>
-            </div>
-        </section>
-
-        <!-- Registration Form -->
-        <section id="registerSection" class="hidden max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-800">Crie sua conta</h2>
-                <p class="text-gray-600">Comece com seu payroll digital hoje</p>
-            </div>
-            <form id="registerForm" class="space-y-6">
-                <div>
-                    <label for="registerName" class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-                    <input type="text" id="registerName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="registerEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="registerEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="registerPassword" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <input type="password" id="registerPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <p class="mt-1 text-xs text-gray-500">Mínimo de 8 caracteres com pelo menos um número</p>
-                </div>
-                <div>
-                    <label for="registerConfirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirme sua senha</label>
-                    <input type="password" id="registerConfirmPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div class="flex items-center">
-                    <input id="termsAgreement" type="checkbox" required class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                    <label for="termsAgreement" class="ml-2 block text-sm text-gray-700">Concordo com a <a href="#" id="privacyPolicyLink" class="text-indigo-600 hover:underline">Política de Privacidade</a></label>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all">
-                    Criar conta
-                </button>
-            </form>
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">Já possui uma conta? <a href="#" id="switchToLogin" class="text-indigo-600 hover:underline">Entrar</a></p>
-            </div>
-        </section>
-
-        <!-- Dashboard Section -->
-        <section id="dashboardSection" class="hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-800">Seu painel do Payroll</h2>
-                <button id="logoutBtn" class="text-indigo-600 hover:underline flex items-center">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Sair
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- Summary Card -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-700">Ganhos Totais</h3>
-                        <i class="fas fa-wallet text-indigo-500 text-xl"></i>
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="loginPassword" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <p class="text-3xl font-bold text-gray-800" id="totalEarnings">R$0,00</p>
-                    <p class="text-sm text-gray-500 mt-2">Total de todos os tempos</p>
-                </div>
-                
-                <!-- Average Card -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-700">Média Mensal</h3>
-                        <i class="fas fa-chart-line text-indigo-500 text-xl"></i>
-                    </div>
-                    <p class="text-3xl font-bold text-gray-800" id="monthlyAverage">R$0,00</p>
-                    <p class="text-sm text-gray-500 mt-2">Baseado no seu histórico</p>
-                </div>
-                
-                <!-- Recent Card -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-700">Último Pagamento</h3>
-                        <i class="fas fa-calendar-check text-indigo-500 text-xl"></i>
-                    </div>
-                    <p class="text-3xl font-bold text-gray-800" id="lastPaycheck">R$0,00</p>
-                    <p class="text-sm text-gray-500 mt-2" id="lastPaycheckDate">Nenhum pagamento ainda</p>
-                </div>
-            </div>
-            
-            <!-- Paycheck History and Add Form -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Paycheck History -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden">
-                    <div class="p-6 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-800">Seu Histórico de Pagamentos</h3>
-                    </div>
-                    <div class="divide-y divide-gray-200">
-                        <div class="p-4 flex justify-between items-center bg-gray-50">
-                            <div class="w-1/4 font-medium text-gray-700">Data</div>
-                            <div class="w-1/4 font-medium text-gray-700">Valor</div>
-                            <div class="w-1/4 font-medium text-gray-700">Impostos</div>
-                            <div class="w-1/4 font-medium text-gray-700">Líquido</div>
-                        </div>
-                        <div id="paycheckHistory" class="divide-y divide-gray-200">
-                            <!-- Paycheck entries will be added here dynamically -->
-                            <div class="p-4 text-center text-gray-500">
-                                Nenhum registro de pagamento encontrado. Adicione seu primeiro pagamento!
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Add Paycheck Form -->
-                <div class="bg-white rounded-xl shadow-md p-6 h-fit sticky top-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Pagamento</h3>
-                    <form id="addPaycheckForm" class="space-y-4">
-                        <div>
-                            <label for="paycheckDate" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                            <input type="date" id="paycheckDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label for="paycheckAmount" class="block text-sm font-medium text-gray-700 mb-1">Valor Bruto (R$)</label>
-                            <input type="number" step="0.01" id="paycheckAmount" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label for="paycheckTax" class="block text-sm font-medium text-gray-700 mb-1">Impostos Retidos (R$)</label>
-                            <input type="number" step="0.01" id="paycheckTax" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label for="paycheckNotes" class="block text-sm font-medium text-gray-700 mb-1">Observações (Opcional)</label>
-                            <textarea id="paycheckNotes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all">
-                            Adicionar Pagamento
-                        </button>
-                    </form>
-                    
-                    <!-- Earnings Chart -->
-                    <div class="mt-8">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ganhos Mensais</h3>
-                        <div class="bg-gray-50 rounded-lg p-4 h-64 flex items-center justify-center">
-                            <p class="text-gray-500">O gráfico aparecerá aqui quando você adicionar pagamentos</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Help Center Section -->
-        <section id="helpCenterSection" class="hidden">
-            <div class="gradient-bg text-white py-6 px-4 sm:px-6 lg:px-8">
-                <div class="max-w-4xl mx-auto">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-3xl font-bold">Central de Ajuda PayRoll</h2>
-                            <p class="mt-2">Relate problemas com seus pagamentos</p>
+                        <div class="flex items-center">
+                            <input id="rememberMe" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Lembrar-me</label>
                         </div>
-                        <div class="bg-white rounded-full p-3 shadow-lg">
-                            <i class="fas fa-hand-holding-usd text-3xl text-purple-600"></i>
+                        <a href="#" class="text-sm text-blue-600 hover:text-blue-500">Esqueceu a senha?</a>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Entrar
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">Não tem uma conta? <a href="#" onclick="showRegisterModal()" class="text-blue-600 hover:text-blue-500">Registre-se</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">Criar Nova Conta</h3>
+                    <button onclick="closeModal('registerModal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label for="registerName" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="registerName" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="registerEmail" class="block text-sm font-medium text-gray-700">E-mail</label>
+                        <input type="email" id="registerEmail" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="registerMatricula" class="block text-sm font-medium text-gray-700">Matrícula</label>
+                        <input type="text" id="registerMatricula" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="registerPassword" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="registerPassword" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="registerConfirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                        <input type="password" id="registerConfirmPassword" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex items-center">
+                        <input id="acceptTerms" type="checkbox" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="acceptTerms" class="ml-2 block text-sm text-gray-700">Eu concordo com os <a href="#" onclick="showPrivacyPolicy()" class="text-blue-600 hover:text-blue-500">Termos de Serviço</a> e <a href="#" onclick="showPrivacyPolicy()" class="text-blue-600 hover:text-blue-500">Política de Privacidade</a></label>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Registrar
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">Já tem uma conta? <a href="#" onclick="showLoginModal()" class="text-blue-600 hover:text-blue-500">Faça login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">Acesso Administrativo</h3>
+                    <button onclick="closeModal('adminLoginModal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="adminLoginForm" class="space-y-4">
+                    <div>
+                        <label for="adminUsername" class="block text-sm font-medium text-gray-700">Usuário Admin</label>
+                        <input type="text" id="adminUsername" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="adminPassword" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="adminPassword" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Entrar como Admin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Center Modal -->
+    <div id="helpModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800">Central de Ajuda</h3>
+                    <button onclick="closeModal('helpModal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="helpForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="helpName" class="block text-sm font-medium text-gray-700">Nome</label>
+                            <input type="text" id="helpName" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="helpEmail" class="block text-sm font-medium text-gray-700">E-mail</label>
+                            <input type="email" id="helpEmail" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="helpMatricula" class="block text-sm font-medium text-gray-700">Matrícula</label>
+                        <input type="text" id="helpMatricula" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="helpIssue" class="block text-sm font-medium text-gray-700">Descreva o problema</label>
+                        <textarea id="helpIssue" rows="4" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Anexar Holerite (Opcional)</label>
+                        <div class="mt-1 file-upload rounded-md p-4 text-center">
+                            <input type="file" id="helpFile" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            <label for="helpFile" class="cursor-pointer">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-600">Arraste e solte o arquivo aqui ou clique para selecionar</p>
+                                    <p class="text-xs text-gray-500 mt-1">Formatos aceitos: PDF, JPG, PNG</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Enviar Solicitação
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4 sticky top-0 bg-white py-2">
+                    <h3 class="text-2xl font-bold text-gray-800">Política de Privacidade e Proteção de Dados</h3>
+                    <button onclick="closeModal('privacyModal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="prose max-w-none">
+                    <h4 class="text-lg font-semibold mt-4">1. Introdução</h4>
+                    <p class="text-gray-700 mt-2">O PayRoll Digital está comprometido com a proteção da privacidade e dos dados pessoais de seus usuários. Esta política descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais.</p>
+                    
+                    <h4 class="text-lg font-semibold mt-6">2. Dados Coletados</h4>
+                    <p class="text-gray-700 mt-2">Coletamos os seguintes tipos de dados:</p>
+                    <ul class="list-disc pl-5 mt-2 text-gray-700">
+                        <li>Informações de identificação (nome, e-mail, matrícula)</li>
+                        <li>Dados de login (e-mail e senha criptografada)</li>
+                        <li>Documentos financeiros (contracheques)</li>
+                        <li>Registros de acesso ao sistema</li>
+                    </ul>
+                    
+                    <h4 class="text-lg font-semibold mt-6">3. Finalidade do Tratamento</h4>
+                    <p class="text-gray-700 mt-2">Seus dados são utilizados para:</p>
+                    <ul class="list-disc pl-5 mt-2 text-gray-700">
+                        <li>Fornecer acesso ao sistema de contracheques</li>
+                        <li>Autenticar usuários</li>
+                        <li>Manter histórico de documentos financeiros</li>
+                        <li>Melhorar nossos serviços</li>
+                        <li>Cumprir obrigações legais</li>
+                    </ul>
+                    
+                    <h4 class="text-lg font-semibold mt-6">4. Compartilhamento de Dados</h4>
+                    <p class="text-gray-700 mt-2">Seus dados pessoais não serão compartilhados com terceiros, exceto quando necessário para cumprimento de obrigações legais ou com seu consentimento explícito.</p>
+                    
+                    <h4 class="text-lg font-semibold mt-6">5. Segurança dos Dados</h4>
+                    <p class="text-gray-700 mt-2">Implementamos medidas técnicas e organizacionais para proteger seus dados contra acesso não autorizado, alteração, divulgação ou destruição.</p>
+                    
+                    <h4 class="text-lg font-semibold mt-6">6. Seus Direitos</h4>
+                    <p class="text-gray-700 mt-2">Você tem direito a:</p>
+                    <ul class="list-disc pl-5 mt-2 text-gray-700">
+                        <li>Acessar seus dados pessoais</li>
+                        <li>Solicitar correção de dados incorretos</li>
+                        <li>Solicitar exclusão de dados</li>
+                        <li>Revogar consentimento</li>
+                        <li>Solicitar portabilidade de dados</li>
+                    </ul>
+                    
+                    <h4 class="text-lg font-semibold mt-6">7. Alterações na Política</h4>
+                    <p class="text-gray-700 mt-2">Esta política pode ser atualizada periodicamente. Recomendamos que você revise esta página regularmente para se manter informado sobre como protegemos suas informações.</p>
+                    
+                    <h4 class="text-lg font-semibold mt-6">8. Contato</h4>
+                    <p class="text-gray-700 mt-2">Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato conosco através da Central de Ajuda no sistema.</p>
+                </div>
+                <div class="mt-6 text-center">
+                    <button onclick="closeModal('privacyModal')" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout (visible after login) -->
+    <div id="mainLayout" class="hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar fixed top-0 left-0 h-full bg-gray-800 text-white w-64 shadow-lg z-40">
+            <div class="p-4 flex items-center justify-between border-b border-gray-700">
+                <div class="flex items-center">
+                    <i class="fas fa-file-invoice-dollar text-2xl text-blue-400 mr-2"></i>
+                    <span class="sidebar-text text-xl font-bold">PayRoll Digital</span>
+                </div>
+                <button id="toggleSidebar" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <span class="text-white font-semibold">JD</span>
+                    </div>
+                    <div class="ml-3 sidebar-text">
+                        <p class="font-medium">João da Silva</p>
+                        <p class="text-xs text-gray-400">Matrícula: 12345</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="mt-4">
+                <div class="px-2">
+                    <button id="adminToggle" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white hidden">
+                        <i class="fas fa-user-shield mr-3"></i>
+                        <span class="sidebar-text">Área Admin</span>
+                        <i class="fas fa-chevron-down ml-auto sidebar-text"></i>
+                    </button>
+                    <div id="adminMenu" class="mt-1 pl-4 hidden">
+                        <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                            <i class="fas fa-users mr-3"></i>
+                            <span class="sidebar-text">Gerenciar Usuários</span>
+                        </a>
+                        <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                            <i class="fas fa-file-upload mr-3"></i>
+                            <span class="sidebar-text">Enviar Contracheques</span>
+                        </a>
+                        <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                            <i class="fas fa-question-circle mr-3"></i>
+                            <span class="sidebar-text">Solicitações de Ajuda</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="px-2 mt-2">
+                    <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-900 text-white">
+                        <i class="fas fa-home mr-3"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i class="fas fa-file-invoice mr-3"></i>
+                        <span class="sidebar-text">Meus Contracheques</span>
+                    </a>
+                    <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i class="fas fa-user mr-3"></i>
+                        <span class="sidebar-text">Meus Dados</span>
+                    </a>
+                    <a href="#" onclick="showHelpModal()" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i class="fas fa-question-circle mr-3"></i>
+                        <span class="sidebar-text">Central de Ajuda</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
+                <a href="#" onclick="showPrivacyPolicy()" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-shield-alt mr-3"></i>
+                    <span class="sidebar-text">Política de Privacidade</span>
+                </a>
+                <a href="#" onclick="logout()" class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    <span class="sidebar-text">Sair</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="contentArea" class="content-area ml-64 min-h-screen transition-all duration-300">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <h1 class="text-lg font-semibold text-gray-900" id="pageTitle">Dashboard</h1>
+                    <div class="flex items-center space-x-4">
+                        <button class="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                <!-- Dashboard Content -->
+                <div id="dashboardContent">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Bem-vindo, João!</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                                        <i class="fas fa-file-invoice-dollar text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Contracheques disponíveis</p>
+                                        <p class="text-2xl font-bold text-gray-800">12</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                                        <i class="fas fa-calendar-alt text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Próximo pagamento</p>
+                                        <p class="text-2xl font-bold text-gray-800">05/07/2023</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                                        <i class="fas fa-wallet text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Salário líquido</p>
+                                        <p class="text-2xl font-bold text-gray-800">R$ 4.856,32</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Últimos Contracheques</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="holerite-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Maio 2023</p>
+                                        <p class="text-sm text-gray-500">Disponível em: 05/06/2023</p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Pago</span>
+                                </div>
+                                <div class="mt-3 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Valor líquido</p>
+                                        <p class="font-semibold text-gray-800">R$ 4.856,32</p>
+                                    </div>
+                                    <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none">
+                                        <i class="fas fa-download mr-1"></i> Baixar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="holerite-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Abril 2023</p>
+                                        <p class="text-sm text-gray-500">Disponível em: 05/05/2023</p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Pago</span>
+                                </div>
+                                <div class="mt-3 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Valor líquido</p>
+                                        <p class="font-semibold text-gray-800">R$ 4.856,32</p>
+                                    </div>
+                                    <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none">
+                                        <i class="fas fa-download mr-1"></i> Baixar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="holerite-card bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <p class="font-medium text-gray-800">Março 2023</p>
+                                        <p class="text-sm text-gray-500">Disponível em: 05/04/2023</p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Pago</span>
+                                </div>
+                                <div class="mt-3 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Valor líquido</p>
+                                        <p class="font-semibold text-gray-800">R$ 4.856,32</p>
+                                    </div>
+                                    <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none">
+                                        <i class="fas fa-download mr-1"></i> Baixar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Content (hidden by default) -->
+                <div id="adminContent" class="hidden">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-6">Painel Administrativo</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+                                        <i class="fas fa-users text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Usuários cadastrados</p>
+                                        <p class="text-2xl font-bold text-gray-800">143</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                                        <i class="fas fa-file-upload text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Contracheques enviados</p>
+                                        <p class="text-2xl font-bold text-gray-800">1.716</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                                        <i class="fas fa-question-circle text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Solicitações de ajuda</p>
+                                        <p class="text-2xl font-bold text-gray-800">8</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Gerenciar Usuários</h3>
+                            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                    <div class="relative w-64">
+                                        <input type="text" placeholder="Buscar usuário..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    </div>
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <i class="fas fa-plus mr-2"></i> Novo Usuário
+                                    </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">E-mail</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matrícula</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                            <span class="text-blue-600 font-medium">JD</span>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">joao.silva@empresa.com</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12345</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                                            <span class="text-purple-600 font-medium">MA</span>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-medium text-gray-900">Maria Aparecida</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">maria.aparecida@empresa.com</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12346</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                                            <span class="text-yellow-600 font-medium">PC</span>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-medium text-gray-900">Pedro Cardoso</div>
+                                                            <div class="text-sm text-gray-500">Admin</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">pedro.cardoso@empresa.com</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12347</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                    <div class="text-sm text-gray-500">
+                                        Mostrando <span class="font-medium">1</span> a <span class="font-medium">3</span> de <span class="font-medium">143</span> resultados
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            Anterior
+                                        </button>
+                                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                                            1
+                                        </button>
+                                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            Próximo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Enviar Contracheques</h3>
+                            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                <form class="space-y-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Mês/Ano de Referência</label>
+                                            <select class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                                <option>Junho 2023</option>
+                                                <option>Maio 2023</option>
+                                                <option>Abril 2023</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Data de Pagamento</label>
+                                            <input type="date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Selecionar Colaboradores</label>
+                                        <select multiple class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md h-32">
+                                            <option>João da Silva (12345)</option>
+                                            <option>Maria Aparecida (12346)</option>
+                                            <option>Pedro Cardoso (12347)</option>
+                                            <option>Ana Paula (12348)</option>
+                                            <option>Carlos Eduardo (12349)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Arquivos PDF</label>
+                                        <div class="mt-1 file-upload rounded-md p-4 text-center">
+                                            <input type="file" id="holeriteFiles" class="hidden" accept=".pdf" multiple>
+                                            <label for="holeriteFiles" class="cursor-pointer">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                                    <p class="text-sm text-gray-600">Arraste e solte os arquivos aqui ou clique para selecionar</p>
+                                                    <p class="text-xs text-gray-500 mt-1">Apenas arquivos PDF</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="pt-4">
+                                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            Enviar Contracheques
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Solicitações de Ajuda</h3>
+                            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="px-6 py-4 border-b border-gray-200">
+                                    <div class="relative w-64">
+                                        <input type="text" placeholder="Buscar solicitação..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Colaborador</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problema</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm font-medium text-gray-900">João da Silva</div>
+                                                    <div class="text-sm text-gray-500">12345</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">Valor do vale-transporte incorreto</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                    <button class="text-green-600 hover:text-green-900"><i class="fas fa-check"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm font-medium text-gray-900">Maria Aparecida</div>
+                                                    <div class="text-sm text-gray-500">12346</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">Contracheque não disponível</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Resolvido</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                    <button class="text-green-600 hover:text-green-900"><i class="fas fa-check"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm font-medium text-gray-900">Carlos Eduardo</div>
+                                                    <div class="text-sm text-gray-500">12349</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">Horas extras não computadas</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Rejeitado</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                    <button class="text-green-600 hover:text-green-900"><i class="fas fa-check"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                    <div class="text-sm text-gray-500">
+                                        Mostrando <span class="font-medium">1</span> a <span class="font-medium">3</span> de <span class="font-medium">8</span> resultados
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            Anterior
+                                        </button>
+                                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                                            1
+                                        </button>
+                                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            Próximo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Landing Page (visible before login) -->
+    <div id="landingPage" class="min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <i class="fas fa-file-invoice-dollar text-2xl text-blue-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">PayRoll Digital</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="#" onclick="showPrivacyPolicy()" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Política de Privacidade</a>
+                        <a href="#" onclick="showHelpModal()" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Central de Ajuda</a>
+                        <button onclick="showLoginModal()" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Entrar
+                        </button>
+                        <button onclick="showAdminLoginModal()" class="px-4 py-2 border border-blue-600 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Admin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="gradient-bg flex-grow flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Seus contracheques de forma digital e segura</h1>
+                        <p class="text-xl text-blue-100 mb-8">Acesse seus comprovantes de pagamento a qualquer momento, de qualquer lugar, com total segurança e privacidade.</p>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="showLoginModal()" class="px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                                Acessar minha conta
+                            </button>
+                            <button onclick="showRegisterModal()" class="px-6 py-3 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white">
+                                Criar nova conta
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <div class="relative w-full max-w-md">
+                            <div class="absolute -top-6 -left-6 w-32 h-32 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+                            <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+                            <div class="absolute top-20 -right-4 w-32 h-32 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+                            <div class="relative bg-white rounded-2xl shadow-xl overflow-hidden">
+                                <div class="bg-blue-600 p-4 text-white">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="font-medium">Contracheque - Maio 2023</h3>
+                                        <span class="text-xs bg-blue-500 px-2 py-1 rounded-full">Novo</span>
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <div class="flex justify-between mb-6">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Colaborador</p>
+                                            <p class="font-medium">João da Silva</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-gray-500">Matrícula</p>
+                                            <p class="font-medium">12345</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex justify-between border-b pb-2">
+                                            <p class="text-gray-600">Salário Base</p>
+                                            <p class="font-medium">R$ 5.000,00</p>
+                                        </div>
+                                        <div class="flex justify-between border-b pb-2">
+                                            <p class="text-gray-600">Horas Extras</p>
+                                            <p class="font-medium text-green-600">R$ 356,32</p>
+                                        </div>
+                                        <div class="flex justify-between border-b pb-2">
+                                            <p class="text-gray-600">INSS</p>
+                                            <p class="font-medium text-red-600">- R$ 500,00</p>
+                                        </div>
+                                        <div class="flex justify-between border-b pb-2">
+                                            <p class="text-gray-600">IRRF</p>
+                                            <p class="font-medium text-red-600">- R$ 143,68</p>
+                                        </div>
+                                        <div class="flex justify-between pt-2">
+                                            <p class="text-gray-600 font-semibold">Líquido a Receber</p>
+                                            <p class="font-bold text-blue-600">R$ 4.856,32</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 pt-4 border-t">
+                                        <button class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            <i class="fas fa-download mr-2"></i> Baixar PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="bg-white rounded-xl p-8 form-shadow">
-                    <div class="mb-8 text-center">
-                        <h3 class="text-2xl font-bold text-gray-800">Formulário de Relato de Problemas</h3>
-                        <p class="mt-2 text-gray-600">Preencha os campos abaixo para reportar qualquer irregularidade em seus pagamentos</p>
-                    </div>
-
-                    <form id="paymentIssueForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                    <input type="text" id="name" name="name" required
-                                        class="input-focus py-2 pl-10 block w-full border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                                        placeholder="Digite seu nome completo">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="registration" class="block text-sm font-medium text-gray-700 mb-1">Matrícula</label>
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-id-card text-gray-400"></i>
-                                    </div>
-                                    <input type="text" id="registration" name="registration" required
-                                        class="input-focus py-2 pl-10 block w-full border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                                        placeholder="Número da matrícula">
-                                </div>
-                            </div>
+        <!-- Features Section -->
+        <div class="bg-white py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Tudo o que você precisa em um só lugar</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">O PayRoll Digital oferece uma solução completa para gestão e acesso aos seus comprovantes de pagamento.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
+                            <i class="fas fa-lock text-xl"></i>
                         </div>
-
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email </label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-envelope text-gray-400"></i>
-                                    </div>
-                                    <input type="email" id="email" name="email" required
-                                        class="input-focus py-2 pl-10 block w-full border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                                        placeholder="seu.email@.com">
-                                </div>
-                            </div>
-
-                            <div class="border-t border-gray-200 pt-6">
-                                <h4 class="text-lg font-medium text-gray-900 mb-4">Selecione o(s) problema(s) encontrado(s)</h4>
-
-                                <div class="space-y-4">
-                                    <div class="flex items-start">
-                                        <div class="flex items-center h-5">
-                                            <input id="late-payment" name="problems" type="checkbox" value="Pagamento atrasado"
-                                                class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded checkbox">
-                                        </div>
-                                        <div class="ml-3 text-sm">
-                                            <label for="late-payment" class="font-medium text-gray-700">Pagamento atrasado</label>
-                                            <p class="text-gray-500">Seu pagamento não foi creditado na data esperada</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start">
-                                        <div class="flex items-center h-5">
-                                            <input id="incorrect-amount" name="problems" type="checkbox" value="Valor incorreto"
-                                                class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded checkbox">
-                                        </div>
-                                        <div class="ml-3 text-sm">
-                                            <label for="incorrect-amount" class="font-medium text-gray-700">Valor incorreto</label>
-                                            <p class="text-gray-500">O valor depositado não corresponde ao esperado</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start">
-                                        <div class="flex items-center h-5">
-                                            <input id="tax-issues" name="problems" type="checkbox" value="Problemas com descontos"
-                                                class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded checkbox">
-                                        </div>
-                                        <div class="ml-3 text-sm">
-                                            <label for="tax-issues" class="font-medium text-gray-700">Problemas com descontos</label>
-                                            <p class="text-gray-500">Descontos estão incorretos</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start">
-                                        <div class="flex items-center h-5">
-                                            <input id="other" name="problems" type="checkbox" value="Outros problemas"
-                                                class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded checkbox">
-                                        </div>
-                                        <div class="ml-3 text-sm">
-                                            <label for="other" class="font-medium text-gray-700">Outros problemas</label>
-                                            <p class="text-gray-500">Descreva abaixo qualquer outra questão não listada</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="details" class="block text-sm font-medium text-gray-700 mb-1">Detalhes do Problema</label>
-                                <div class="mt-1">
-                                    <textarea id="details" name="details" rows="4"
-                                        class="input-focus shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                                        placeholder="Descreva com detalhes o problema encontrado, incluindo períodos afetados, valores esperados vs. recebidos, e qualquer outra informação relevante."></textarea>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center">
-                                <input id="attach" name="attach" type="checkbox"
-                                    class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded checkbox">
-                                <label for="attach" class="ml-2 block text-sm text-gray-700">
-                                    Desejo anexar comprovantes (holerites, extratos bancários, etc.)
-                                </label>
-                            </div>
-
-                            <div id="fileUpload" class="hidden">
-                                <label class="block text-sm font-medium text-gray-700">Anexar arquivos</label>
-                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                                    <div class="space-y-1 text-center">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        <div class="flex text-sm text-gray-600">
-                                            <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
-                                                <span>Enviar arquivo</span>
-                                                <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple>
-                                            </label>
-                                            <p class="pl-1">ou arraste e solte</p>
-                                        </div>
-                                        <p class="text-xs text-gray-500">PNG, JPG, PDF até 10MB</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="pt-6">
-                                <button type="submit"
-                                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 ease-in-out">
-                                    <i class="fas fa-paper-plane mr-2"></i> Envir Relatório
-                                </button>
-                            </div>
-                        </form>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Segurança</h3>
+                        <p class="text-gray-600">Seus dados protegidos com criptografia de última geração e autenticação de dois fatores.</p>
                     </div>
-
-                    <div class="mt-8 bg-blue-50 rounded-lg p-6">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-info-circle text-blue-400 text-2xl"></i>
-                            </div>
-                            <div class="ml-3">
-                                <h5 class="text-sm font-medium text-blue-800">Informações importantes</h5>
-                                <div class="mt-2 text-sm text-blue-700">
-                                    <p>• Seu relato será analisado pelo departamento financeiro em até 5 dias úteis</p>
-                                    <p class="mt-1">• Para problemas urgentes, entre em contato diretamente com o ADM pelo telefone (71) 9 9265-9535</p>
-                                    <p class="mt-1">• Você receberá um e-mail de confirmação e outro com a resposta assim que sua solicitação for processada</p>
-                                </div>
-                            </div>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
+                            <i class="fas fa-mobile-alt text-xl"></i>
                         </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Acesso Multiplataforma</h3>
+                        <p class="text-gray-600">Acesse seus contracheques de qualquer dispositivo, a qualquer momento.</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mb-4">
+                            <i class="fas fa-history text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Histórico Completo</h3>
+                        <p class="text-gray-600">Tenha acesso a todos os seus comprovantes de pagamento em um único lugar.</p>
                     </div>
                 </div>
-            </section>
-
-            <!-- Privacy Policy Section -->
-            <section id="privacyPolicySection" class="hidden bg-gray-50 text-gray-800 font-sans">
-                <div class="container mx-auto px-4 py-8 max-w-4xl">
-                    <!-- Header -->
-                    <header class="mb-12 text-center">
-                        <h1 class="text-4xl font-bold text-blue-600 mb-4">
-                            <i class="fas fa-shield-alt mr-2"></i> Política de Privacidade
-                        </h1>
-                        <p class="text-lg text-gray-600">Última atualização: <span id="current-date" class="font-semibold"></span></p>
-                    </header>
-
-                    <!-- Introduction -->
-                    <section class="mb-12 p-6 rounded-lg shadow-md bg-white">
-                        <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                            <i class="fas fa-info-circle mr-2"></i> Introdução
-                        </h2>
-                        <p class="mb-4">Nossa empresa está comprometida com a proteção da privacidade e dos dados pessoais de nossos clientes. Esta política explica como coletamos, usamos, compartilhamos e protegemos suas informações.</p>
-                        <p class="text-sm bg-blue-50 text-blue-800 p-4 rounded highlight-box">
-                            <i class="fas fa-exclamation-circle mr-2"></i> Ao utilizar nossos serviços, você concorda com a coleta e uso de informações de acordo com esta política.
-                        </p>
-                    </section>
-
-                    <!-- Data Collection -->
-                    <section class="mb-12 p-6 rounded-lg shadow-md bg-white section-highlight">
-                        <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                            <i class="fas fa-database mr-2"></i> Dados que Coletamos
-                        </h2>
-                                        
-                        <div class="mb-6">
-                            <h3 class="text-xl font-medium text-gray-700 mb-3">1. Informações Pessoais</h3>
-                            <ul class="list-disc pl-6 space-y-2">
-                                <li>Nome completo</li>
-                                <li>Endereço de e-mail</li>
-                                <li>Número de telefone</li>
-                                <li>Endereço físico</li>
-                                <li>Documentos de identificação (quando necessário)</li>
-                            </ul>
-                        </div>
-                                        
-                        <div>
-                            <h3 class="text-xl font-medium text-gray-700 mb-3">2. Dados Automáticos</h3>
-                            <ul class="list-disc pl-6 space-y-2">
-                                <li>Endereço IP</li>
-                                <li>Tipo de navegador</li>
-                                <li>Páginas acessadas</li>
-                                <li>Horário de acesso</li>
-                            </ul>
-                        </div>
-                    </section>
-
-                    <!-- Data Usage -->
-                    <section class="mb-12 p-6 rounded-lg shadow-md bg-white">
-                        <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                            <i class="fas fa-cogs mr-2"></i> Como Utilizamos Seus Dados
-                        </h2>
-                                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-check-circle text-blue-500 mr-2"></i> Finalidades Principais
-                                </h4>
-                                <ul class="list-disc pl-5 space-y-1 text-sm">
-                                    <li>Fornecer e melhorar nossos serviços</li>
-                                    <li>Comunicação com clients</li>
-                                    <li>Prevenção de fraudes</li>
-                                </ul>
-                            </div>
-                                                        
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-700 mb-2">
-                                    <i class="fas fa-chart-line text-blue-500 mr-2"></i> Finalidades Secundárias
-                                </h4>
-                                <ul class="list-disc pl-5 space-y-1 text-sm">
-                                    <li>Análise de dados para melhorias</li>
-                                    <li>Marketing personalizado (com consentimento)</li>
-                                    <li>Cumprimento de obrigações legais</li>
-                                </ul>
-                            </div>
-                        </div>
-                                        
-                        <div class="mt-6 p-4 bg-yellow-50 text-yellow-800 rounded-lg">
-                            <i class="fas fa-exclamation-triangle mr-2"></i> Nunca vendemos seus dados pessoais a terceiros. Compartilhamentos são feitos apenas conforme descrito nesta política.
-                        </div>
-                    </section>
-
-                    <!-- Data Protection -->
-                    <section class="mb-12 p-6 rounded-lg shadow-md bg-white section-highlight">
-                        <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                            <i class="fas fa-shield-virus mr-2"></i> Proteção de Dados
-                        </h2>
-                                        
-                        <div class="mb-6">
-                            <h3 class="text-xl font-medium text-gray-700 mb-3">Medidas de Segurança</h3>
-                            <div class="grid md:grid-cols-3 gap-4">
-                                <div class="bg-white p-4 rounded border border-gray-200 text-center">
-                                    <i class="fas fa-lock text-3xl text-blue-500 mb-2"></i>
-                                    <h4 class="font-medium">Criptografia</h4>
-                                    <p class="text-sm mt-2">Dados sensíveis são criptografados usando TLS/SSL</p>
-                                </div>
-                                <div class="bg-white p-4 rounded border border-gray-200 text-center">
-                                    <i class="fas fa-user-shield text-3xl text-blue-500 mb-2"></i>
-                                    <h4 class="font-medium">Controle de Acesso</h4>
-                                    <p class="text-sm mt-2">Acesso restrito a pessoal autorizado</p>
-                                </div>
-                                <div class="bg-white p-4 rounded border border-gray-200 text-center">
-                                    <i class="fas fa-sync-alt text-3xl text-blue-500 mb-2"></i>
-                                    <h4 class="font-medium">Atualizações Regulares</h4>
-                                    <p class="text-sm mt-2">Sistemas constantemente atualizados</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- User Rights -->
-                    <section class="mb-12 p-6 rounded-lg shadow-md bg-white">
-                        <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                            <i class="fas fa-user-check mr-2"></i> Seus Direitos
-                        </h2>
-                                        
-                        <div class="space-y-4">
-                            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                <h3 class="font-medium text-gray-700 flex items-center">
-                                    <i class="fas fa-eye mr-2 text-blue-500"></i> Acesso aos Dados
-                                </h3>
-                                <p class="text-sm mt-1">Você pode solicitar uma cópia dos dados pessoais que mantemos sobre você.</p>
-                            </div>
-                                                        
-                            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                <h3 class="font-medium text-gray-700 flex items-center">
-                                    <i class="fas fa-edit mr-2 text-blue-500"></i> Retificação
-                                </h3>
-                                <p class="text-sm mt-1">Pode solicitar a correção de dados incompletos ou imprecisos.</p>
-                            </div>
-                                                        
-                            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                <h3 class="font-medium text-gray-700 flex items-center">
-                                    <i class="fas fa-trash-alt mr-2 text-blue-500"></i> Exclusão
-                                </h3>
-                                <p class="text-sm mt-1">Pode solicitar a exclusão de dados, exceto quando exigido por lei.</p>
-                            </div>
-                                                        
-                            <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                <h3 class="font-medium text-gray-700 flex items-center">
-                                    <i class="fas fa-ban mr-2 text-blue-500"></i> Oposição
-                                </h3>
-                                <p class="text-sm mt-1">Pode se opor ao processamento de dados para fins de marketing direto.</p>
-                            </div>
-                        </div>
-                                        
-                        <div class="mt-6 p-4 bg-blue-50 text-blue-800 rounded-lg">
-                            <i class="fas fa-envelope mr-2"></i> Para exercer seus direitos, entre em contato através do e-mail: <span class="font-medium">Alan.Rocha@Iberostartheclub.com</span>
-                        </div>
-                    </section>
-
-                    <!-- Changes to Policy -->
-                    <section class="mb-12 p-6 rounded-lg shadow-md bg-white">
-                        <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                            <i class="fas fa-sync mr-2"></i> Alterações na Política
-                        </h2>
-                        <p class="mb-4">Esta política pode be atualizada periodicamente. Notificaremos sobre mudanças significativas através de:</p>
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>E-mail para usuários cadastrados</li>
-                            <li>Aviso em nosso website</li>
-                            <li>Notificação no aplicativo (quando aplicável)</li>
-                        </ul>
-                        <p class="mt-4">A data da última revisão está indicada no topo desta página.</p>
-                    </section>
-
-                    <!-- Contact -->
-                    <section class="p-6 rounded-lg shadow-md bg-blue-600 text-white">
-                        <h2 class="text-2xl font-semibold mb-4">
-                            <i class="fas fa-headset mr-2"></i> Dúvidas e Contato
-                        </h2>
-                        <p class="mb-4">Para qualquer questão sobre esta política de privacidade ou tratamento de dados, entre em contato conosco:</p>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <h3 class="font-medium mb-2"><i class="fas fa-envelope mr-2"></i> E-mail:</h3>
-                                <p>Alan.Rocha@Iberostartheclub.com</p>
-                            </div>
-                            <div>
-                                <h3 class="font-medium mb-2"><i class="fas fa-phone-alt mr-2"></i> Telefone:</h3>
-                                <p>(71) 9 9265-9535</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Scroll to Top Button -->
-                    <button onclick="topFunction()" id="scroll-top" class="scroll-top bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition">
-                        <i class="fas fa-arrow-up"></i>
-                    </button>
-                </div>
-            </section>
-        </main>
+            </div>
+        </div>
 
         <!-- Footer -->
-        <footer class="bg-gray-800 text-white py-8">
-            <div class="container mx-auto px-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <footer class="bg-gray-800 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
-                        <h3 class="text-xl font-bold mb-4 flex items-center">
-                            <i class="fas fa-money-bill-wave mr-2"></i> PayRoll Digital
-                        </h3>
-                        <p class="text-gray-400">Ajudando você a monitorar e gerenciar seu payroll desde 2025.</p>
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-file-invoice-dollar text-2xl text-blue-400 mr-2"></i>
+                            <span class="text-xl font-bold">PayRoll Digital</span>
+                        </div>
+                        <p class="text-gray-400">Solução completa para gestão e acesso digital de contracheques.</p>
                     </div>
                     <div>
-                        <h4 class="font-semibold mb-4">Funcionalidades</h4>
+                        <h3 class="text-lg font-semibold mb-4">Links Rápidos</h3>
                         <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Acompanhamento de Pagamentos</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Análise de Ganhos</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Cálculos de Impostos</a></li>
+                            <li><a href="#" onclick="showLoginModal()" class="text-gray-400 hover:text-white">Acessar Conta</a></li>
+                            <li><a href="#" onclick="showRegisterModal()" class="text-gray-400 hover:text-white">Criar Conta</a></li>
+                            <li><a href="#" onclick="showHelpModal()" class="text-gray-400 hover:text-white">Central de Ajuda</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 class="font-semibold mb-4">Recursos</h4>
+                        <h3 class="text-lg font-semibold mb-4">Informações</h3>
                         <ul class="space-y-2">
-                            <li><a href="#" id="helpCenterLink" class="text-gray-400 hover:text-white transition-colors">Central de Ajuda</a></li>
-                            <li><a href="#" id="privacyPolicyFooterLink" class="text-gray-400 hover:text-white transition-colors">Política de Privacidade</a></li>
+                            <li><a href="#" onclick="showPrivacyPolicy()" class="text-gray-400 hover:text-white">Política de Privacidade</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white">Termos de Serviço</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Contato</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-center text-gray-400"><i class="fas fa-envelope mr-2"></i> suporte@payrolldigital.com</li>
+                            <li class="flex items-center text-gray-400"><i class="fas fa-phone-alt mr-2"></i> (11) 1234-5678</li>
                         </ul>
                     </div>
                 </div>
                 <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                    <p>&copy; 2025 PayRoll Digital. Todos os direitos reservados.</p>
+                    <p>&copy; 2023 PayRoll Digital. Todos os direitos reservados.</p>
                 </div>
             </div>
         </footer>
+    </div>
 
-        <script>
-            // DOM Elements
-            const heroSection = document.getElementById('hero');
-            const loginSection = document.getElementById('loginSection');
-            const registerSection = document.getElementById('registerSection');
-            const dashboardSection = document.getElementById('dashboardSection');
-            const helpCenterSection = document.getElementById('helpCenterSection');
-            const privacyPolicySection = document.getElementById('privacyPolicySection');
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const addPaycheckForm = document.getElementById('addPaycheckForm');
-            const paymentIssueForm = document.getElementById('paymentIssueForm');
-            const paycheckHistory = document.getElementById('paycheckHistory');
-            const totalEarnings = document.getElementById('totalEarnings');
-            const monthlyAverage = document.getElementById('monthlyAverage');
-            const lastPaycheck = document.getElementById('lastPaycheck');
-            const lastPaycheckDate = document.getElementById('lastPaycheckDate');
-            const loginLink = document.getElementById('loginLink');
-            const registerLink = document.getElementById('registerLink');
-            const homeLink = document.getElementById('homeLink');
-            const helpCenterLink = document.getElementById('helpCenterLink');
-            const privacyPolicyLink = document.getElementById('privacyPolicyLink');
-            const privacyPolicyFooterLink = document.getElementById('privacyPolicyFooterLink');
-            const getStartedBtn = document.getElementById('getStartedBtn');
-            const switchToRegister = document.getElementById('switchToRegister');
-            const switchToLogin = document.getElementById('switchToLogin');
-            const logoutBtn = document.getElementById('logoutBtn');
-            // State
-            let currentUser = null;
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-            let paychecks = JSON.parse(localStorage.getItem('paychecks')) || [];
-            // Event Listeners
-            loginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showLogin();
-            });
-            registerLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showRegister();
-            });
-            homeLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showHero();
-            });
-            helpCenterLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showHelpCenter();
-            });
-            privacyPolicyLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showPrivacyPolicy();
-            });
-            privacyPolicyFooterLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                showPrivacyPolicy();
-            });
-            getStartedBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showRegister();
-            });
-            switchToRegister.addEventListener('click', (e) => {
-                e.preventDefault();
-                showRegister();
-            });
-            switchToLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                showLogin();
-            });
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                handleLogin();
-            });
-            registerForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                handleRegister();
-            });
-            addPaycheckForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                addPaycheck();
-            });
-            paymentIssueForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                handlePaymentIssue();
-            });
-            // File upload toggle
-            document.getElementById('attach').addEventListener('change', function() {
-                document.getElementById('fileUpload').classList.toggle('hidden', !this.checked);
-            });
-            // Functions
-            function showHero() {
-                heroSection.classList.remove('hidden');
-                loginSection.classList.add('hidden');
-                registerSection.classList.add('hidden');
-                dashboardSection.classList.add('hidden');
-                helpCenterSection.classList.add('hidden');
-                privacyPolicySection.classList.add('hidden');
-            }
-            function showLogin() {
-                heroSection.classList.add('hidden');
-                loginSection.classList.remove('hidden');
-                registerSection.classList.add('hidden');
-                dashboardSection.classList.add('hidden');
-                helpCenterSection.classList.add('hidden');
-                privacyPolicySection.classList.add('hidden');
-            }
-            function showRegister() {
-                heroSection.classList.add('hidden');
-                loginSection.classList.add('hidden');
-                registerSection.classList.remove('hidden');
-                dashboardSection.classList.add('hidden');
-                helpCenterSection.classList.add('hidden');
-                privacyPolicySection.classList.add('hidden');
-            }
-            function showDashboard() {
-                heroSection.classList.add('hidden');
-                loginSection.classList.add('hidden');
-                registerSection.classList.add('hidden');
-                dashboardSection.classList.remove('hidden');
-                helpCenterSection.classList.add('hidden');
-                privacyPolicySection.classList.add('hidden');
-                updateDashboard();
-            }
-            function showHelpCenter() {
-                heroSection.classList.add('hidden');
-                loginSection.classList.add('hidden');
-                registerSection.classList.add('hidden');
-                dashboardSection.classList.add('hidden');
-                helpCenterSection.classList.remove('hidden');
-                privacyPolicySection.classList.add('hidden');
-            }
-            function showPrivacyPolicy() {
-                heroSection.classList.add('hidden');
-                loginSection.classList.add('hidden');
-                registerSection.classList.add('hidden');
-                dashboardSection.classList.add('hidden');
-                helpCenterSection.classList.add('hidden');
-                privacyPolicySection.classList.remove('hidden');
-                
-                // Set current date in privacy policy
-                document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR');
-            }
-            function handleLogin() {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                const user = users.find(u => u.email === email && u.password === password);
-                
-                if (user) {
-                    currentUser = user;
-                    showDashboard();
-                    // Clear form
-                    loginForm.reset();
-                } else {
-                    alert('Email ou senha inválidos');
-                }
-            }
-            function handleRegister() {
-                const name = document.getElementById('registerName').value;
-                const email = document.getElementById('registerEmail').value;
-                const password = document.getElementById('registerPassword').value;
-                const confirmPassword = document.getElementById('registerConfirmPassword').value;
-                
-                // Simple validation
-                if (password !== confirmPassword) {
-                    alert('As senhas não coincidem');
-                    return;
-                }
-                
-                if (users.some(u => u.email === email)) {
-                    alert('Email já cadastrado');
-                    return;
-                }
-                
-                const newUser = {
-                    id: Date.now().toString(),
-                    name,
-                    email,
-                    password
-                };
-                
-                users.push(newUser);
-                localStorage.setItem('users', JSON.stringify(users));
-                
-                currentUser = newUser;
-                showDashboard();
-                // Clear form
-                registerForm.reset();
-            }
-            function logout() {
-                currentUser = null;
-                showHero();
-            }
-            function addPaycheck() {
-                if (!currentUser) return;
-                
-                const date = document.getElementById('paycheckDate').value;
-                const amount = parseFloat(document.getElementById('paycheckAmount').value);
-                const tax = parseFloat(document.getElementById('paycheckTax').value);
-                const notes = document.getElementById('paycheckNotes').value;
-                
-                const net = amount - tax;
-                
-                const newPaycheck = {
-                    id: Date.now().toString(),
-                    userId: currentUser.id,
-                    date,
-                    amount,
-                    tax,
-                    net,
-                    notes
-                };
-                
-                paychecks.push(newPaycheck);
-                localStorage.setItem('paychecks', JSON.stringify(paychecks));
-                
-                // Clear form
-                addPaycheckForm.reset();
-                // Set date to today
-                document.getElementById('paycheckDate').valueAsDate = new Date();
-                
-                updateDashboard();
-            }
-            function handlePaymentIssue() {
-                // Get form values
-                const name = document.getElementById('name').value;
-                const registration = document.getElementById('registration').value;
-                const email = document.getElementById('email').value;
-                const problems = Array.from(document.querySelectorAll('input[name="problems"]:checked')).map(el => el.value);
-                const details = document.getElementById('details').value;
-                const attachFiles = document.getElementById('attach').checked;
-                // Validate form
-                if(!name || !registration || !email || problems.length === 0) {
-                    alert('Por favor, preencha todos os campos obrigatórios.');
-                    return;
-                }
-                // In a real application, you would send this data to a server
-                console.log('Payment issue reported:', {
-                    name,
-                    registration,
-                    email,
-                    problems,
-                    details,
-                    attachFiles
-                });
-                // Show success message
-                alert('Seu relato foi enviado com sucesso! Você receberá um e-mail de confirmação em breve.');
-                paymentIssueForm.reset();
-                document.getElementById('fileUpload').classList.add('hidden');
-                document.getElementById('attach').checked = false;
-            }
-            function updateDashboard() {
-                if (!currentUser) return;
-                
-                const userPaychecks = paychecks.filter(p => p.userId === currentUser.id);
-                
-                // Update stats
-                if (userPaychecks.length > 0) {
-                    const total = userPaychecks.reduce((sum, p) => sum + p.net, 0);
-                    const avg = total / userPaychecks.length;
-                    const last = userPaychecks[userPaychecks.length - 1];
-                    
-                    totalEarnings.textContent = `R$${total.toFixed(2)}`;
-                    monthlyAverage.textContent = `R$${avg.toFixed(2)}`;
-                    lastPaycheck.textContent = `R$${last.net.toFixed(2)}`;
-                    lastPaycheckDate.textContent = formatDate(last.date);
-                } else {
-                    totalEarnings.textContent = 'R$0,00';
-                    monthlyAverage.textContent = 'R$0,00';
-                    lastPaycheck.textContent = 'R$0,00';
-                    lastPaycheckDate.textContent = 'Nenhum pagamento ainda';
-                }
-                
-                // Update history
-                paycheckHistory.innerHTML = '';
-                
-                if (userPaychecks.length === 0) {
-                    paycheckHistory.innerHTML = `
-                        <div class="p-4 text-center text-gray-500">
-                            Nenhum registro de pagamento encontrado. Adicione seu primeiro pagamento!
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Sort by date (newest first)
-                userPaychecks.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                userPaychecks.forEach(p => {
-                    const paycheckEntry = document.createElement('div');
-                    paycheckEntry.className = 'p-4 flex justify-between items-center paycheck-entry transition-all';
-                    paycheckEntry.innerHTML = `
-                        <div class="w-1/4 text-gray-700">${formatDate(p.date)}</div>
-                        <div class="w-1/4 text-gray-700">R$${p.amount.toFixed(2)}</div>
-                        <div class="w-1/4 text-gray-700">R$${p.tax.toFixed(2)}</div>
-                        <div class="w-1/4 font-medium text-indigo-600">R$${p.net.toFixed(2)}</div>
-                    `;
-                    paycheckHistory.appendChild(paycheckEntry);
-                });
-            }
-            function formatDate(dateString) {
-                const options = { year: 'numeric', month: 'short', day: 'numeric' };
-                return new Date(dateString).toLocaleDateString('pt-BR', options);
-            }
-            // Initialize
-            document.getElementById('paycheckDate').valueAsDate = new Date();
-            showHero();
-            // Scroll to top functionality for privacy policy
-            window.onscroll = function() {scrollFunction()};
+    <script>
+        // Show login modal when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Uncomment this line to show login modal automatically
+            // document.getElementById('loginModal').classList.remove('hidden');
+        });
+
+        // Modal functions
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('registerModal').classList.add('hidden');
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function showAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('registerModal').classList.add('hidden');
+        }
+
+        function showHelpModal() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+
+        function showPrivacyPolicy() {
+            document.getElementById('privacyModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Form submissions
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simulate login
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('mainLayout').classList.remove('hidden');
             
-            function scrollFunction() {
-                const scrollTopBtn = document.getElementById("scroll-top");
-                if (scrollTopBtn) {
-                    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                        scrollTopBtn.style.display = "block";
+            // Check if admin login
+            const email = document.getElementById('loginEmail').value;
+            if (email.includes('admin')) {
+                document.getElementById('adminToggle').classList.remove('hidden');
+                document.getElementById('dashboardContent').classList.add('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
+                document.getElementById('pageTitle').textContent = 'Painel Administrativo';
+            }
+        });
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simulate admin login
+            document.getElementById('adminLoginModal').classList.add('hidden');
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('mainLayout').classList.remove('hidden');
+            document.getElementById('adminToggle').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.add('hidden');
+            document.getElementById('adminContent').classList.remove('hidden');
+            document.getElementById('pageTitle').textContent = 'Painel Administrativo';
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simulate registration
+            alert('Conta criada com sucesso! Faça login para acessar o sistema.');
+            document.getElementById('registerModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+        });
+
+        document.getElementById('helpForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simulate help request
+            alert('Sua solicitação foi enviada com sucesso! Entraremos em contato em breve.');
+            document.getElementById('helpModal').classList.add('hidden');
+        });
+
+        // Toggle admin menu
+        document.getElementById('adminToggle').addEventListener('click', function() {
+            document.getElementById('adminMenu').classList.toggle('hidden');
+        });
+
+        // Toggle sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+            document.getElementById('contentArea').classList.toggle('ml-64');
+            document.getElementById('contentArea').classList.toggle('ml-16');
+            document.getElementById('contentArea').classList.toggle('content-expanded');
+        });
+
+        // Logout function
+        function logout() {
+            document.getElementById('mainLayout').classList.add('hidden');
+            document.getElementById('landingPage').classList.remove('hidden');
+            document.getElementById('adminToggle').classList.add('hidden');
+            document.getElementById('adminMenu').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+            document.getElementById('adminContent').classList.add('hidden');
+            document.getElementById('pageTitle').textContent = 'Dashboard';
+            
+            // Reset forms
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            document.getElementById('adminLoginForm').reset();
+            document.getElementById('helpForm').reset();
+        }
+
+        // File upload interactions
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            const container = input.closest('.file-upload');
+            input.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    container.classList.add('border-blue-500', 'bg-blue-50');
+                    if (this.files.length === 1) {
+                        container.querySelector('p.text-sm').textContent = this.files[0].name;
                     } else {
-                        scrollTopBtn.style.display = "none";
+                        container.querySelector('p.text-sm').textContent = `${this.files.length} arquivos selecionados`;
                     }
                 }
-            }
+            });
             
-            function topFunction() {
-                window.scrollTo({top: 0, behavior: 'smooth'});
-            }
-        </script>
-    <p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=Lanroccha/payroll-digital" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('border-blue-500', 'bg-blue-50');
+            });
+            
+            container.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                if (!input.files.length) {
+                    this.classList.remove('border-blue-500', 'bg-blue-50');
+                }
+            });
+            
+            container.addEventListener('drop', function(e) {
+                e.preventDefault();
+                input.files = e.dataTransfer.files;
+                const event = new Event('change');
+                input.dispatchEvent(event);
+            });
+        });
+    </script>
+</body>
 </html>
